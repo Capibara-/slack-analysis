@@ -9,7 +9,7 @@ from multiprocessing import Pool
 
 import requests
 
-CHANNELS_DIR = './channel-data'
+CHANNELS_DIR = '/Users/gabik/git/slack-stuff/2018-full'
 CHANNELS_GLOB = '*.json'
 USERS_FILE = './users.json'
 INDEX_NAME = 'slack'
@@ -28,6 +28,9 @@ ES_MAPPING = {
                     "ignore_above": 512
                 }
             }
+        },
+        "is_thread": {
+            "type": "boolean"
         }
     }
 }
@@ -40,7 +43,7 @@ def main():
     put_mapping(INDEX_NAME, ES_MAPPING)
 
     users = get_user_data()
-    for filepath in glob.iglob('{}/*.json'.format(CHANNELS_DIR)):
+    for filepath in glob.iglob('{}/**/*.json'.format(CHANNELS_DIR)):
         with open(filepath, 'r') as channel_file:
             print("[*] Indexing {}.".format(filepath))
             channel_name = channel_name_from_path(filepath)
@@ -58,7 +61,7 @@ def get_user_data():
 
 
 def channel_name_from_path(fname):
-    return os.path.splitext(os.path.basename(os.path.split(fname)[1]))[0]
+    return os.path.basename(os.path.split(fname)[0])
 
 
 # Slack msg processing:
@@ -79,6 +82,8 @@ def extract_data(msg, users, channel_name):
     text = relevant_text(msg)
     date_data = timestamp_for(msg)
     return  {'user': username_for(msg, users),
+             'is_thread': check_is_thread(msg),
+             'thread_ts': extract_thread_ts(msg),
             'channel': channel_name,
             'text': text,
             'alert_status': alert_status_for(msg),
@@ -87,6 +92,14 @@ def extract_data(msg, users, channel_name):
             'afterhours': date_data['afterhours'],
             'timestamp': date_data['timestamp']}
 
+
+
+def check_is_thread(msg):
+    return 'thread_ts' in msg
+
+
+def extract_thread_ts(msg):
+    return msg['thread_ts'] if 'thread_ts' in msg  else None
 
 def timestamp_for(msg):
     date = datetime.fromtimestamp(int(float(msg['ts'])))
@@ -156,7 +169,6 @@ def put_mapping(index_name, mapping):
 def put_to_es(msg, type_name, id):
     url = '{}/{}/_doc/{}'.format(ES_URL, type_name, id)
     response = requests.put(url, json=msg)
-    response.raise_for_status()
     return response.status_code == 200
 
 
