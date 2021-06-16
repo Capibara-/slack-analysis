@@ -39,7 +39,7 @@ ES_MAPPING = {
 def main():
     pool = Pool(10)
     delete_index(INDEX_NAME)
-    delete_index(INDEX_NAME+'-v2')
+    delete_index(INDEX_NAME + '-v2')
     put_mapping(INDEX_NAME, ES_MAPPING)
 
     users = get_user_data()
@@ -64,7 +64,7 @@ def channel_name_from_path(fname):
     return os.path.basename(os.path.split(fname)[0])
 
 
-# Slack msg processing:
+# Slack alert msg processing:
 def alert_status_for(msg):
     alert_open_regex = r'CRIT:.*'
     alert_close_regex = r'OK:.*'

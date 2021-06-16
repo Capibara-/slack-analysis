@@ -8,7 +8,7 @@ import urllib
 CHANNELS_FILE = './channels.json'
 OUTPUT_DIR = "./channel-data"
 RELEVANT_CHANNELS = ['html-server', 'html-server-urgent']
-TOKEN = "YEA_RIGHT"
+TOKEN = "xoxp-2918055338-274852144613-483653196983-cfbad05b941c9121f0662bbc94d55711"
 BASE_URL = "https://slack.com/api/channels.history"
 PAGE_SIZE = 1000
 MAX_MSGS = PAGE_SIZE * 2
